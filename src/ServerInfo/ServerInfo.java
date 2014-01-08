@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -21,14 +23,16 @@ import com.comphenix.protocol.wrappers.WrappedServerPing;
 public class ServerInfo extends JavaPlugin {
 	
 	Logger log;
-	List<WrappedGameProfile> Text = new ArrayList<WrappedGameProfile>();
+	protected List<WrappedGameProfile> Text = new ArrayList<WrappedGameProfile>();
+	FileConfiguration config;
 	
-	private String ConvertFormat(String format){
+	protected String ConvertFormat(String format){
 	    return format.replace("#0", ""+ChatColor.BLACK).replace("#1", ""+ChatColor.DARK_BLUE).replace("#2", ""+ChatColor.DARK_GREEN).replace("#3", ""+ChatColor.DARK_AQUA).replace("#4", ""+ChatColor.DARK_RED).replace("#5", ""+ChatColor.DARK_PURPLE).replace("#6", ""+ChatColor.GOLD).replace("#7", ""+ChatColor.GRAY).replace("#8", ""+ChatColor.DARK_GRAY).replace("#9", ""+ChatColor.BLUE).replace("#a", ""+ChatColor.GREEN).replace("#b", ""+ChatColor.AQUA).replace("#c", ""+ChatColor.RED).replace("#d", ""+ChatColor.LIGHT_PURPLE).replace("#e", ""+ChatColor.YELLOW).replace("#f", ""+ChatColor.WHITE);
 	}
 	
 	
 	public void onEnable(){
+		
 		log = Logger.getLogger("Minecraft");
 		log.info("GuiServerInfo activating...");
 		ProtocolLibrary.getProtocolManager().addPacketListener(
@@ -41,7 +45,7 @@ public class ServerInfo extends JavaPlugin {
 			}
 		);
 		this.saveDefaultConfig();
-		FileConfiguration config = getConfig();
+		config = getConfig();
 		for (int i = 0; i < config.getStringList("Text").size();i++){
 			Text.add(
 					new WrappedGameProfile(
@@ -51,11 +55,37 @@ public class ServerInfo extends JavaPlugin {
 			}
 		log.info("GuiServerInfo active!");
 	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (sender.isOp()){
+			if (args.length > 0){
+				if (args[0].equalsIgnoreCase("set")){
+					Text.clear();
+					List<String> newConf = new ArrayList<String>();
+					for (int i = 1; i < args.length; i++){
+						Text.add(new WrappedGameProfile("id" + Text.size() + 1, ConvertFormat(args[i])));
+						newConf.add(args[i]);
+						log.info("Add ServerInfo: " + args[i]);
+					}
+					config.set("Text", newConf);
+					sender.sendMessage("Successful!");
+					return true;
+				}
+			}
+			return false;
+		} else {
+			sender.sendMessage("You not op!");
+			return true;
+		}
+	}
+	
 	private void handlePing(WrappedServerPing ping) {
 		ping.setPlayers(Text);
 	}
 	
 	public void onDisable(){
+		saveConfig();
 		log.info("GuiServerInfo disabled!");
 	}
 

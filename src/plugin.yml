@@ -1,3 +1,7 @@
 name: GuiServerInfo
 main: ServerInfo.ServerInfo
 version: 1.0
+commands:
+   ServerInfo:
+       description: Sets ServerInfo.
+       usage: Usage: /ServerInfo set <arg1> <arg2> <argN>
