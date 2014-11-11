@@ -15,19 +15,19 @@ public class ServerInfoAPI extends ServerInfo {
 	public void setServerInfo(String[] Text){
 		List<WrappedGameProfile> tmp = new ArrayList<WrappedGameProfile>();
 		for (int i = 0; i < Text.length; i++) {
-			tmp.set(i, new WrappedGameProfile("id" + i + 1, ConvertFormat(Text[i])));
+			tmp.set(i, getWrappedGameProfile("id" + i + 1, ConvertFormat(Text[i])));
 		}
 		super.Text = tmp;
 		super.log.info("Set new ServerInfo");
 	}
 	
 	public void insertServerInfoString(String str, int num){
-		Text.set(num, new WrappedGameProfile("id" + num, ConvertFormat(str)));
+		Text.set(num, getWrappedGameProfile("id" + num, ConvertFormat(str)));
 		super.log.info("Add new ServerInfo - num:" + num + ", Text:" + str);
 	}
 	
 	public void addServerInfoString(String str){
-		Text.add(new WrappedGameProfile("id" + Text.size() + 1, ConvertFormat(str)));
+		Text.add(getWrappedGameProfile("id" + Text.size() + 1, ConvertFormat(str)));
 		super.log.info("Add new ServerInfo: " + str);
 	}
 	
