@@ -3,6 +3,7 @@ package ServerInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
@@ -27,14 +28,13 @@ public class ServerInfo extends JavaPlugin {
 	FileConfiguration config;
 	
 	protected String ConvertFormat(String format){
-	    return format.replace("#0", ""+ChatColor.BLACK).replace("#1", ""+ChatColor.DARK_BLUE).replace("#2", ""+ChatColor.DARK_GREEN).replace("#3", ""+ChatColor.DARK_AQUA).replace("#4", ""+ChatColor.DARK_RED).replace("#5", ""+ChatColor.DARK_PURPLE).replace("#6", ""+ChatColor.GOLD).replace("#7", ""+ChatColor.GRAY).replace("#8", ""+ChatColor.DARK_GRAY).replace("#9", ""+ChatColor.BLUE).replace("#a", ""+ChatColor.GREEN).replace("#b", ""+ChatColor.AQUA).replace("#c", ""+ChatColor.RED).replace("#d", ""+ChatColor.LIGHT_PURPLE).replace("#e", ""+ChatColor.YELLOW).replace("#f", ""+ChatColor.WHITE);
+	    return ChatColor.translateAlternateColorCodes('#', format);
 	}
 	
 	
 	public void onEnable(){
-		
-		log = Logger.getLogger("Minecraft");
-		log.info("GuiServerInfo activating...");
+		log = getLogger();
+		log.info("Activating...");
 		ProtocolLibrary.getProtocolManager().addPacketListener(
 			new PacketAdapter(this, ListenerPriority.NORMAL,
 			Arrays.asList(PacketType.Status.Server.OUT_SERVER_INFO), ListenerOptions.ASYNC) {
@@ -48,12 +48,12 @@ public class ServerInfo extends JavaPlugin {
 		config = getConfig();
 		for (int i = 0; i < config.getStringList("Text").size();i++){
 			Text.add(
-					new WrappedGameProfile(
+					getWrappedGameProfile(
 							"id" + i + 1,
 							ConvertFormat(config.getStringList("Text").get(i)))
 					);
 			}
-		log.info("GuiServerInfo active!");
+		log.info("GuiServerInfo is active!");
 	}
 	
 	@Override
@@ -64,7 +64,7 @@ public class ServerInfo extends JavaPlugin {
 					Text.clear();
 					List<String> newConf = new ArrayList<String>();
 					for (int i = 1; i < args.length; i++){
-						Text.add(new WrappedGameProfile("id" + Text.size() + 1, ConvertFormat(args[i])));
+						Text.add(getWrappedGameProfile("id" + Text.size() + 1, ConvertFormat(args[i])));
 						newConf.add(args[i]);
 						log.info("Add ServerInfo: " + args[i]);
 					}
@@ -73,9 +73,9 @@ public class ServerInfo extends JavaPlugin {
 					return true;
 				}
 			}
-			return false;
+			return true;
 		} else {
-			sender.sendMessage("You not op!");
+			sender.sendMessage("You are not op!");
 			return true;
 		}
 	}
@@ -89,4 +89,8 @@ public class ServerInfo extends JavaPlugin {
 		log.info("GuiServerInfo disabled!");
 	}
 
+	public WrappedGameProfile getWrappedGameProfile(String num, String str) {
+		return new WrappedGameProfile(UUID.nameUUIDFromBytes(num.getBytes()), str);
+	}
+	
 }
